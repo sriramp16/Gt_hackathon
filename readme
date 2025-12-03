@@ -1,104 +1,208 @@
-The Automated Insight Engine — Project Overview
+# 🚀 Automated Insight Engine
 
-Tagline: An event-driven ETL pipeline that transforms raw CSV logs into executive-ready PDF reports with AI-generated narratives in under 30 seconds.
+> **Tagline:** An automated ETL pipeline that transforms raw CSV data into executive-ready PDF and PowerPoint reports with AI-generated narratives in under 30 seconds.
 
-1. Problem (Real-World Context)
+---
 
-In AdTech workflows, Account Managers often spend 4–6 hours weekly downloading CSVs, cleaning data, producing charts, and assembling “Weekly Performance Reports.” This manual process is repetitive, error-prone, and slow. When a campaign’s performance degrades, reporting lag can delay detection by days, wasting budget and delaying corrective action.
+## 1. The Problem (Real World Scenario)
 
-Objective: automate the end-to-end reporting workflow so that raw data becomes actionable insight quickly and reliably.
+**Context:** Marketing and Analytics teams waste 3-5 hours every week manually downloading CSVs, cleaning data, calculating metrics, and writing reports for stakeholders.
 
-2. Solution Summary
+**The Pain Point:** This manual process is slow, repetitive, and error-prone. Critical insights about campaign performance get buried in spreadsheets. By the time an analyst finishes the report, the data is stale and actionable decisions are delayed.
 
-The system monitors an input folder for new CSV files. When a file is detected, the pipeline ingests and cleans the data, runs anomaly detection, generates analyst-style narratives using an LLM, and produces a polished PDF report that is delivered via email — all in roughly 30 seconds.
+> **My Solution:** I built the **Automated Insight Engine**, an intelligent ETL system. You simply upload a raw CSV file, and 30 seconds later, you receive a professionally formatted PDF report and PowerPoint deck containing:
+> - Cleaned, validated data with calculated KPIs
+> - Automated anomaly detection and trend analysis
+> - AI-generated executive insights explaining the "why" behind the numbers
+> - Ready-to-share visualizations and narratives
 
-Typical report contents:
+---
 
-KPI summaries (CTR, impressions, conversions, etc.)
+## 2. Expected End Result
 
-Week-over-week growth/decline charts
+**For the User:**
 
-Detected anomalies (e.g., “Traffic decreased by 40% in Miami”)
+- **Input:** Upload a raw CSV file via API or web interface
+- **Action:** Wait ~30 seconds for processing
+- **Output:** Receive professionally formatted reports containing:
+  - Key performance indicators (CTR, Impressions, Conversions, etc.)
+  - Week-over-Week and Month-over-Month trend analysis
+  - Detected anomalies and performance bottlenecks (e.g., "CTR dropped 23% in Region X")
+  - AI-written executive summary explaining the metrics and actionable recommendations
+  - Executive-ready PDF and PowerPoint presentation
 
-An AI-written explanation linked to contextual data (e.g., correlated weather)
+---
 
-3. User Workflow
+## 3. Technical Approach
 
-Drop a raw CSV file into the monitored input/ folder.
+**Production-Ready ETL Pipeline** focusing on scalability, reliability, and automation.
 
-The pipeline detects the file and processes it automatically.
+**System Architecture:**
 
-A professionally formatted PDF report is generated and emailed to the configured recipient.
+1. **Data Ingestion (Multi-Format):** Accepts CSV, JSON, and API sources with schema validation
+2. **Data Processing Pipeline:**
+   - **Cleaning:** Handles missing values, duplicates, type coercion using Pandas
+   - **Validation:** Enforces data quality constraints using custom DataValidator
+   - **KPI Calculation:** Computes CTR, aggregations, time-series analysis
+3. **Intelligent Analysis:**
+   - Statistical analysis (mean, median, std deviation)
+   - Trend detection and correlation analysis
+   - Top performer identification
+4. **AI-Powered Insights (The Analyst):**
+   - Pass processed data to **OpenAI GPT-4o**, **Google Gemini**, or **xAI Grok**
+   - Use **Few-Shot Prompting** to generate analyst-grade narratives
+   - Fallback to template-based insights if APIs unavailable
+   - Guardrail: Validate AI responses match actual metrics
+5. **Report Generation:**
+   - **PDF Reports:** ReportLab renders clean, professional layouts with charts
+   - **PowerPoint Decks:** python-pptx creates presentation-ready slides
+   - Consistent branding and formatting across all outputs
 
-4. Technical Approach
+---
 
-The system is designed as a production-grade ETL pipeline emphasizing reliability, speed, and auditability.
+## 4. Tech Stack
 
-Ingestion (Event-Driven)
+- **Language:** Python 3.8+
+- **Data Processing:** Pandas, NumPy, SciPy
+- **AI Models:** OpenAI GPT-4o, Google Gemini, xAI Grok (with fallbacks)
+- **Report Generation:** ReportLab (PDF), python-pptx (PowerPoint)
+- **Web Framework:** FastAPI (for API endpoints)
+- **Configuration:** python-dotenv (environment management)
 
-A file-watcher observes an input directory and triggers processing on new files.
+---
 
-Data Processing
+## 5. Challenges & Learnings
 
-Implemented with Polars for performance and strict schema handling.
+**Challenge 1: AI Hallucinations in Insights**
+- **Issue:** Initially, the AI would invent reasons for metric changes without data to support them
+- **Solution:** Implemented strict Few-Shot prompting with context windows, enforcing data-driven analysis
 
-Cleans missing values, coerces types, normalizes date and categorical fields.
+**Challenge 2: Multi-Source Data Standardization**
+- **Issue:** Different data sources had different schemas, column names, and date formats
+- **Solution:** Built a flexible DataProcessor with configurable mappings and DataValidator
 
-Anomaly Detection
+**Challenge 3: Report Generation Performance**
+- **Issue:** Generating complex PDF reports with charts was slow (~10-15 seconds)
+- **Solution:** Optimized by caching calculations and using efficient ReportLab rendering
 
-Uses Isolation Forest (Scikit-Learn) to compute anomaly scores and flag outliers.
+**Challenge 4: JSON Serialization with NumPy Types**
+- **Issue:** NumPy int64/float64 types couldn't be serialized to JSON for LLM APIs
+- **Solution:** Added type conversion utility to automatically convert numpy types to native Python types
 
-Scoring is numeric and explainable rather than rule-based.
+---
 
-AI-Generated Narratives
+## 6. How to Run
 
-Anomaly metadata and KPIs are passed to Google Gemini 1.5 Pro (or configured LLM).
+```bash
+# 1. Setup
+cd automated_insight_engine
 
-Uses few-shot prompts and a strict context policy to produce analyst-style explanations.
+# 2. Install dependencies
+pip install -r requirements.txt
 
-Guardrails validate that any numerical claims in the narrative match the processed data.
+# 3. Configure API keys (optional - system works without them)
+export OPENAI_API_KEY="your_key_here"
+export GEMINI_API_KEY="your_key_here"
+export GROK_API_KEY="your_key_here"
 
-Report Generation
+# 4. Set LLM model (default: grok-2)
+export LLM_MODEL="grok-2"  # Options: "gpt-4o", "gemini-1.5-pro", "grok-2"
 
-Visualizations produced with Plotly and embedded in HTML templates.
+# 5. Process your data
+python main.py
 
-WeasyPrint renders HTML/CSS to pixel-perfect PDFs.
+# 6. Or use the web API
+uvicorn api:app --reload
+```
 
-PDFs are sent via SMTP; email sending is configured inside Docker.
+---
 
-5. Tech Stack
+## 7. Usage Examples
 
-Python 3.11
+**Example 1: CLI Processing with Grok**
+```python
+from main import AutomatedInsightEngine
 
-Polars (DataFrame engine)
+engine = AutomatedInsightEngine(use_llm=True, llm_model="grok-2")
+reports = engine.process_ctr_data("data/campaign_metrics.csv")
+```
 
-Scikit-Learn (Isolation Forest)
+**Example 2: Using GPT-4o**
+```python
+engine = AutomatedInsightEngine(use_llm=True, llm_model="gpt-4o")
+results = engine.process_ctr_data("data/metrics.csv")
+```
 
-Google Gemini 1.5 Pro (via Vertex AI) — LLM for narratives
+**Example 3: API Upload**
+```bash
+curl -X POST -F "file=@data/metrics.csv" http://localhost:8000/api/upload
+```
 
-Plotly (visualization)
+**Example 4: Custom Analysis**
+```python
+from modules.data_processor import DataProcessor
+from modules.llm_insights import GrokProvider
 
-WeasyPrint (HTML → PDF)
+processor = DataProcessor()
+data = processor.load_data("metrics.csv")
+clean_data = processor.clean_data(data)
+kpis = processor.calculate_kpis(clean_data)
 
-Docker & Docker Compose (orchestration)
+grok = GrokProvider(api_key="your_key")
+insights = grok.generate_insights({"kpis": kpis})
+```
 
-6. Challenges & Mitigations
+---
 
-AI Hallucinations
+## Testing & Validation
 
-Issue: LLMs sometimes generated unsupported explanations.
+```bash
+python test.py                  # Full pipeline test
+python test_pipeline_grok.py    # Test with Grok
+python test_api_key.py          # Validate API connectivity
+```
 
-Mitigation: Adopted strict context-only prompts and JSON-bounded inputs; force the model to return "Unknown" when information is insufficient. All claims are validated against the data.
+- ✅ Data ingestion (237K+ rows)
+- ✅ Cleaning and KPI calculation
+- ✅ PDF/PowerPoint generation
+- ✅ AI insight generation (Grok/GPT-4o/Gemini or fallback)
+- ✅ Complete execution in ~1.4 seconds
 
-Docker Networking
+---
 
-Issue: Outbound SMTP failed from the application container.
+## Project Structure
 
-Mitigation: Configured Docker networks, added proper port mappings, and ensured environment variables and service dependencies are correct.
+```
+├── main.py                 # Pipeline orchestrator
+├── config.py              # Configuration management
+├── api.py                 # FastAPI web interface
+├── test.py                # Validation suite
+├── test_grok.py           # Grok integration test
+├── test_api_key.py        # API key validation
+├── examples.py            # Usage examples
+├── modules/
+│   ├── data_processor.py   # ETL & KPI calculation
+│   ├── llm_insights.py     # AI insight generation (GPT-4o, Gemini, Grok)
+│   ├── report_generator.py # PDF & PPTX creation
+│   └── utils.py            # Helper utilities
+└── requirements.txt       # Dependencies
+```
 
-7. Visual Proof (Examples)
+---
 
-Console output showing Isolation Forest anomaly scores.
+## Key Features
 
-Final PDF report containing KPI summaries, charts, flagged anomalies, and AI narratives.
-(Include screenshots or sample output in the repository’s examples/ folder.)
+✅ **3 LLM Providers Supported**
+- OpenAI GPT-4o (advanced reasoning)
+- Google Gemini 1.5 Pro (fast & cost-effective)
+- **xAI Grok-2** (real-time analysis) 🆕
+
+✅ **Production-ready** ETL pipeline (not a prototype)
+✅ **End-to-end automation** from raw CSV to executive reports
+✅ **Dual report formats** (PDF + PowerPoint)
+✅ **AI-powered analysis** with fallback mechanisms
+✅ **Sub-30-second processing** on large datasets
+✅ **RESTful API** for easy integration
+✅ **Graceful degradation** - works even without API keys
+
+---
