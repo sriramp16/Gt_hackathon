@@ -1,0 +1,104 @@
+The Automated Insight Engine — Project Overview
+
+Tagline: An event-driven ETL pipeline that transforms raw CSV logs into executive-ready PDF reports with AI-generated narratives in under 30 seconds.
+
+1. Problem (Real-World Context)
+
+In AdTech workflows, Account Managers often spend 4–6 hours weekly downloading CSVs, cleaning data, producing charts, and assembling “Weekly Performance Reports.” This manual process is repetitive, error-prone, and slow. When a campaign’s performance degrades, reporting lag can delay detection by days, wasting budget and delaying corrective action.
+
+Objective: automate the end-to-end reporting workflow so that raw data becomes actionable insight quickly and reliably.
+
+2. Solution Summary
+
+The system monitors an input folder for new CSV files. When a file is detected, the pipeline ingests and cleans the data, runs anomaly detection, generates analyst-style narratives using an LLM, and produces a polished PDF report that is delivered via email — all in roughly 30 seconds.
+
+Typical report contents:
+
+KPI summaries (CTR, impressions, conversions, etc.)
+
+Week-over-week growth/decline charts
+
+Detected anomalies (e.g., “Traffic decreased by 40% in Miami”)
+
+An AI-written explanation linked to contextual data (e.g., correlated weather)
+
+3. User Workflow
+
+Drop a raw CSV file into the monitored input/ folder.
+
+The pipeline detects the file and processes it automatically.
+
+A professionally formatted PDF report is generated and emailed to the configured recipient.
+
+4. Technical Approach
+
+The system is designed as a production-grade ETL pipeline emphasizing reliability, speed, and auditability.
+
+Ingestion (Event-Driven)
+
+A file-watcher observes an input directory and triggers processing on new files.
+
+Data Processing
+
+Implemented with Polars for performance and strict schema handling.
+
+Cleans missing values, coerces types, normalizes date and categorical fields.
+
+Anomaly Detection
+
+Uses Isolation Forest (Scikit-Learn) to compute anomaly scores and flag outliers.
+
+Scoring is numeric and explainable rather than rule-based.
+
+AI-Generated Narratives
+
+Anomaly metadata and KPIs are passed to Google Gemini 1.5 Pro (or configured LLM).
+
+Uses few-shot prompts and a strict context policy to produce analyst-style explanations.
+
+Guardrails validate that any numerical claims in the narrative match the processed data.
+
+Report Generation
+
+Visualizations produced with Plotly and embedded in HTML templates.
+
+WeasyPrint renders HTML/CSS to pixel-perfect PDFs.
+
+PDFs are sent via SMTP; email sending is configured inside Docker.
+
+5. Tech Stack
+
+Python 3.11
+
+Polars (DataFrame engine)
+
+Scikit-Learn (Isolation Forest)
+
+Google Gemini 1.5 Pro (via Vertex AI) — LLM for narratives
+
+Plotly (visualization)
+
+WeasyPrint (HTML → PDF)
+
+Docker & Docker Compose (orchestration)
+
+6. Challenges & Mitigations
+
+AI Hallucinations
+
+Issue: LLMs sometimes generated unsupported explanations.
+
+Mitigation: Adopted strict context-only prompts and JSON-bounded inputs; force the model to return "Unknown" when information is insufficient. All claims are validated against the data.
+
+Docker Networking
+
+Issue: Outbound SMTP failed from the application container.
+
+Mitigation: Configured Docker networks, added proper port mappings, and ensured environment variables and service dependencies are correct.
+
+7. Visual Proof (Examples)
+
+Console output showing Isolation Forest anomaly scores.
+
+Final PDF report containing KPI summaries, charts, flagged anomalies, and AI narratives.
+(Include screenshots or sample output in the repository’s examples/ folder.)
