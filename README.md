@@ -215,6 +215,3 @@ python test_api_key.py          # Validate API connectivity
 | Google | gemini-1.5-pro | Fast, cost-effective | ✅ Active |
 | xAI | grok-2 | Real-time data analysis | ✅ NEW |
 
----
-
-**H-001 Hackathon Submission - "The Automated Insight Engine"** ✅
